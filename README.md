@@ -5,6 +5,8 @@ To use: Run the program and when prompted enter the desired width and height of 
 
 Plans for the future: The ability to let the user zoom into the set, change where the camera is focused and to choose their own colour scheme.
 
+![Sample Render][logo]
+
 [logo]: http://i.imgur.com/KUuRIGn.png?1
 
 
