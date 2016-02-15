@@ -115,9 +115,9 @@ void BMP::write(std::unique_ptr<std::vector<Pixel> > &pixelArray)
     } 
 }
 
-double get_act_coord(int coord, int dimension)
+double get_act_coord(int coord, int dimension, double scale, double offset)
 {
-  return double(coord)/double(dimension)*4 - 2;
+  return (double(coord)/double(dimension)*4 - 2)*scale + offset;
 }
 
 
@@ -136,25 +136,39 @@ int it_to_escape(double x0, double y0, int maxIt)
   return it;
 }
 
-void render(std::unique_ptr<std::vector<Pixel> > &pixelArray, int width, int height, int maxIts)
+
+
+void render(std::unique_ptr<std::vector<Pixel> > &pixelArray, int width, int height, double xScale, double yScale, double xOffset, double yOffset, int maxIts)
 {
   //Draw the image
   for(int pixel = 0; pixel < width*height; pixel++)
     {
       int x = pixel%width, y = (pixel - pixel%width)/width;
-      float actX = get_act_coord(x,width), actY = get_act_coord(y,height);
+      double actX = get_act_coord(x,width,xScale,xOffset), actY = get_act_coord(y,height,yScale,yOffset);
       int itsToEscape = it_to_escape(actX,actY,maxIts);
-      (*pixelArray)[pixel].set(255-itsToEscape/maxIts*700,250-itsToEscape*500,150-itsToEscape*400);
+      (*pixelArray)[pixel].set((255*itsToEscape)/maxIts,(255*itsToEscape)/maxIts,(255*itsToEscape)/maxIts);
     }
 }
 
-void get_image_dimensions(int &width, int &height, int &maxIts)
+void get_image_dimensions(int &width, int &height, double &xScale, double &yScale, double &xOffset, double &yOffset, int&maxIts)
 {
   std::cout << "Enter the width (in pixels) of the image:\n";
   std::cin >> width;
 
   std::cout << "Enter the height (in pixels) of the image:\n";
   std::cin >> height;
+
+  std::cout << "Enter the X scaling factor:\n";
+  std::cin >> xScale;
+
+  std::cout << "Enter the Y scaling factor:\n";
+  std::cin >> yScale;   
+
+  std::cout << "Enter X offset:\n";
+  std::cin >> xOffset;
+
+  std::cout << "Enter Y offset:\n";
+  std::cin >> yOffset;
 
   std::cout << "Enter the maximum number of iterations:\n";
   std::cin >> maxIts;
@@ -163,12 +177,13 @@ void get_image_dimensions(int &width, int &height, int &maxIts)
 int main()
 {
   int width, height, maxIts;
-  get_image_dimensions(width, height, maxIts);
+  double xScale, yScale, xOffset, yOffset;
+  get_image_dimensions(width, height, xScale, yScale, xOffset, yOffset, maxIts);
 
   //Create the pixel array
   std::unique_ptr<std::vector<Pixel> > pixelArray(new std::vector<Pixel>(width*height,Pixel()));
 
-  render(pixelArray, width, height, maxIts);
+  render(pixelArray, width, height, xScale, yScale, xOffset, yOffset, maxIts);
   
   BMP image(width,height,"out.bmp");
   image.write(pixelArray);
